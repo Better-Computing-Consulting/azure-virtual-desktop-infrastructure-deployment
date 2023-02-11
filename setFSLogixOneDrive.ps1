@@ -1,4 +1,4 @@
-﻿param (
+param (
     [string]$connectionString = $(throw "-connectionString is required."),
     [string]$tennantId = $(throw "-tennantId is required.")
 )
@@ -71,6 +71,16 @@ if(!(Test-Path $HKLMregistryPath)){New-Item -Path $HKLMregistryPath -Force > $nu
 New-ItemProperty -Path $HKLMregistryPath -Name 'SilentAccountConfig' -ErrorAction:SilentlyContinue -PropertyType:DWord  -Value '1' -Force 
 New-ItemProperty -Path $HKLMregistryPath -Name "KFMSilentOptIn" -ErrorAction:SilentlyContinue -PropertyType:String -Value $tennantId -Force
 New-ItemProperty -Path $HKLMregistryPath -Name 'FilesOnDemandEnabled' -ErrorAction:SilentlyContinue -PropertyType:DWord -Value '1' -Force
+
+try {
+    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+    Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+    rm .\AzureCLI.msi
+    "Installed AzureCLI"
+} 
+catch {
+    Throw "Failed to install AzureCLI"
+}
 
 cd ..
 Remove-Item -Recurse -Force .\temp
