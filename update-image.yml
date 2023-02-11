@@ -1,0 +1,17 @@
+trigger:
+ branches:
+  include:
+    - master
+ paths:
+   include:
+     - new_scripts/*.ps1'
+
+pool:
+  vmImage: ubuntu-latest
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AzureServiceConnection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+#    inlineScript: 'az webapp webjob triggered run --name $(WebAppName) --resource-group $(ResGrpName) --webjob-name GraphExcelEmailerWebJob -o yamlc'    

@@ -1,0 +1,24 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pr: none
+trigger: none
+
+schedules:
+- cron: "00 1 * * 7"
+  displayName: "Run deploy job Sundays, 1AM" 
+  always: true
+  branches:
+    include:
+      - master
+pool:
+  vmImage: windows-latest
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AzureServiceConnection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    #inlineScript: 'az webapp webjob triggered run --name $(WebAppName) --resource-group $(ResGrpName) --webjob-name GraphExcelEmailerWebJob -o yamlc'
