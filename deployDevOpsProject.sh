@@ -90,7 +90,7 @@ pipelineId=$(az pipelines create \
 	--name CronDeployImagePipeline \
 	--repository $3 \
 	--branch master \
-    --yml-path deploy-image.yml \
+    	--yml-path deploy-image.yml \
 	--skip-first-run true \
 	--service-connection $gitHubSvcId --only-show-errors --query id)
 
