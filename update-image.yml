@@ -4,7 +4,7 @@ trigger:
     - master
  paths:
    include:
-     - new_scripts/*.ps1'
+     - 'new_scripts/*.ps1'
 
 pool:
   vmImage: ubuntu-latest
