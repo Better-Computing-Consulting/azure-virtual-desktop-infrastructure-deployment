@@ -3,7 +3,7 @@
     "/subscriptions/enter-subscription-id-here"
   ],
   "description": "Grants full access to manage all resources, including assigning identitry to an app, but does not allow us to remove the identity, manage assignments in Azure Blueprints, or share image galleries.",
-  "name": "Custom VDI Demo Contributor Role",
+  "name": "Custom project-id Project Contributor Role",
   "permissions": [
     {
       "actions": [
@@ -20,6 +20,6 @@
       "notDataActions": []
     }
   ],
-  "roleName": "Custom VDI Demo Contributor",
+  "roleName": "Custom project-id Project Contributor Role",
   "type": "Microsoft.Authorization/roleDefinitions"
 }

@@ -25,16 +25,18 @@ spName=$1-sp
 subscription_id=$(az account show --query id -o tsv)
 
 sed -i "s/enter-subscription-id-here/$subscription_id/g" CustomRole.json
+sed -i "s/project-id/$1/g" CustomRole.json
 
 az role definition create --role-definition @CustomRole.json --only-show-errors --query "{roleType: roleType, roleName:roleName}" -o jsonc
 
 sed -i "s/$subscription_id/enter-subscription-id-here/g" CustomRole.json
+sed -i "s/$1/project-id/g" CustomRole.json
 
 rgId=$(az group show --query id)
 
 spKey=$(az ad sp create-for-rbac \
 	--name $spName \
-	--role "Custom VDI Demo Contributor Role" \
+	--role "Custom $1 Project Contributor Role" \
 	--scopes $rgId --only-show-errors --query password)
 
 #spKey=$(az ad sp create-for-rbac --name $spName --role "Website Contributor" --scopes $rgId --only-show-errors --query password)
