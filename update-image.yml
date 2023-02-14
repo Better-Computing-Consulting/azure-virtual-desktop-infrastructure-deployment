@@ -20,7 +20,7 @@ steps:
       mv new_scripts/$afile .
       ./updateImage.sh $(System.TeamProject) $afile
       mv $afile done_scripts/
-      echo "$(System.TeamProject)@$(UserDomain)"
+      echo "updateimagepipeline@$(UserDomain)"
       echo "$(System.TeamProject)" 
       git config --global user.email "$(System.TeamProject)@$(UserDomain)"
       git config --global user.name "$(System.TeamProject)"  
