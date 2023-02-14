@@ -14,4 +14,17 @@ steps:
     azureSubscription: 'AzureServiceConnection'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
-#    inlineScript: 'az webapp webjob triggered run --name $(WebAppName) --resource-group $(ResGrpName) --webjob-name GraphExcelEmailerWebJob -o yamlc'    
+    inlineScript: |
+      git checkout -b master
+      afile=$(ls new_scripts)
+      mv new_scripts/$afile .
+      ./updateImage.sh $(System.TeamProject) $afile
+      mv $afile done_scripts/
+      echo "$(System.TeamProject)@$(UserDomain)"
+      echo "$(System.TeamProject)" 
+      git config --global user.email "$(System.TeamProject)@$(UserDomain)"
+      git config --global user.name "$(System.TeamProject)"  
+      git status  
+      git add .     
+      git commit -m "Processed script"
+      git push --set-upstream origin master
