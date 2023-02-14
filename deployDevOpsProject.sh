@@ -87,6 +87,10 @@ pipelineId=$(az pipelines create \
 
 echo $'\e[1;33m'$2/$1/_build?definitionId=$pipelineId$'\e[0m'
 
+usrName=$(az account show --query user.name -o tsv)
+
+az pipelines variable create --name UserDomain --value ${usrName#*@} --pipeline-id $pipelineId --output none
+
 # Create cron deploy latest image pipeline
 pipelineId=$(az pipelines create \
 	--name CronDeployImagePipeline \
