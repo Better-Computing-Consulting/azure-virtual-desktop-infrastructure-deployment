@@ -27,7 +27,7 @@ steps:
       #
       git config --global user.email "$(GitHubUser)"
       git config --global user.name "$(System.TeamProject)"
-      git status  
-      git add .     
+      git status
+      git add .
       git commit -m "Processed script"
       git push --set-upstream origin master
