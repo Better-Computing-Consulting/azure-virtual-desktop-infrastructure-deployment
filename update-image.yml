@@ -20,9 +20,12 @@ steps:
       mv new_scripts/$afile .
       ./updateImage.sh $(System.TeamProject) $afile
       mv $afile done_scripts/
-      echo "updateimagepipeline@$(UserDomain)"
-      echo "$(System.TeamProject)" 
-      git config --global user.email "$(System.TeamProject)@$(UserDomain)"
+      #
+      # GitHub commands require granting "Bypass policies when pushing"
+      # and "Contribute" rights to the Project's Buid Service User account
+      # under Project settings > Repositories > Security.
+      #
+      git config --global user.email "$(GitHubUser)"
       git config --global user.name "$(System.TeamProject)"  
       git status  
       git add .     
