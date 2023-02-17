@@ -9,6 +9,8 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 steps:
+- checkout: self
+  persistCredentials: true
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'AzureServiceConnection'
@@ -30,4 +32,4 @@ steps:
       git status
       git add .
       git commit -m "Processed script"
-      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --set-upstream origin master
+      git push --set-upstream origin master
