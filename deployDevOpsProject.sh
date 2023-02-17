@@ -39,7 +39,6 @@ spKey=$(az ad sp create-for-rbac \
 	--role "Custom $1 Project Contributor Role" \
 	--scopes $rgId --only-show-errors --query password)
 
-#spKey=$(az ad sp create-for-rbac --name $spName --role "Website Contributor" --scopes $rgId --only-show-errors --query password)
 
 #
 # Must run az login before running the script
