@@ -26,6 +26,10 @@ foreach ($ahost in $activeHosts){
             $hostsToReplace += 1
         }
 }
+if ( $hostsToReplace -eq 0 ){ 
+    "All host are at the latest image version"
+    Exit 
+}
 "Number of hosts to replace: " + $hostsToReplace
 
 $registrationInfo = New-AzWvdRegistrationInfo -ResourceGroupName $rgName -HostPoolName $hostPool -ExpirationTime $((get-date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))
@@ -34,10 +38,15 @@ $Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName
 
 $vault = $projectId + "-KV"
 
-Update-AzKeyVaultNetworkRuleSet -DefaultAction Allow -VaultName $vault
+$pubIp = (Invoke-WebRequest -uri “https://api.ipify.org/”).Content
+
+#
+# Grant KeyVault access to the current public IP and retrieve the VDI host username and password
+#
+Add-AzKeyVaultNetworkRule -VaultName $vault -IpAddressRange $pubIp
 $vdiHostAdminUsername = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminUsername -AsPlainText
 $textPassword = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminPassword -AsPlainText
-Update-AzKeyVaultNetworkRuleSet -DefaultAction Deny -VaultName $vault
+Remove-AzKeyVaultNetworkRule -VaultName $vault -IpAddressRange $pubIp
 
 $vdiHostAdminPassword = ConvertTo-SecureString $textPassword -AsPlainText -Force
 $Credential = New-Object System.Management.Automation.PSCredential ($vdiHostAdminUsername, $vdiHostAdminPassword);
