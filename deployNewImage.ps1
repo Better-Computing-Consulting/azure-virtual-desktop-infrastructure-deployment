@@ -46,16 +46,14 @@ if ( $hostsToReplace -eq 0 ){
 # Get the information required to deploy new hosts, i.e, Pool registration key, VNet info, Username and Password
 #
 $registrationInfo = New-AzWvdRegistrationInfo -ResourceGroupName $rgName -HostPoolName $hostPool -ExpirationTime $((get-date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))
-
 $Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName
-
-$vault = $projectId + "-KV"
-
-$pubIp = (Invoke-WebRequest -uri “https://api.ipify.org/”).Content
 
 #
 # Grant KeyVault access to the current public IP and retrieve the VDI host username and password, and remove access when done.
 #
+$vault = $projectId + "-KV"
+$pubIp = (Invoke-WebRequest -uri “https://api.ipify.org/”).Content
+
 Add-AzKeyVaultNetworkRule -VaultName $vault -IpAddressRange $pubIp
 $vdiHostAdminUsername = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminUsername -AsPlainText
 $textPassword = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminPassword -AsPlainText
@@ -78,7 +76,6 @@ for($i = 1;$i -le $hostsToReplace;$i++)
 {
     "Deploying host " + $i + " of " + $hostsToReplace
     $newVMName = $vmName + $i
-    $newVMName
     $NICName = $newVMName + "VMNic"
     $NIC = New-AzNetworkInterface -Name $NICName -ResourceGroupName $rgName -Location $Location -SubnetId $Vnet.Subnets[0].Id
 
@@ -90,7 +87,7 @@ for($i = 1;$i -le $hostsToReplace;$i++)
     $VM = Set-AzVMSourceImage -VM $VM -Id $latestImage.id
 
     "Deploying VM " + $newVMName
-    New-AzVM -ResourceGroupName $rgName -Location $location -VM $VM -LicenseType Windows_Client -DisableBginfoExtension -Verbose
+    New-AzVM -ResourceGroupName $rgName -Location $location -VM $VM -LicenseType Windows_Client -DisableBginfoExtension
 
     "Joining VM " + $newVMName + " to AAD"
     Set-AzVMExtension -ResourceGroupName $rgName -VMName $newVMName -Name  "AADLoginForWindows" -Location $VM.Location `
@@ -105,7 +102,6 @@ for($i = 1;$i -le $hostsToReplace;$i++)
 #
 foreach ($shost in $activeHosts){ 
         $vm = Get-AzVM -ResourceId $shost.ResourceId
-        $vm.Name
         if ($vm.StorageProfile.ImageReference.ExactVersion -ne $latestImage.name){
             "Disabling new sessions on VM: " + $vm.Name
             Update-AzWvdSessionHost -ResourceGroupName $rgName `
