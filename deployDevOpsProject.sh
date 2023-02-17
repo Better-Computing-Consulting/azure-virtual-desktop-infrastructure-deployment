@@ -22,7 +22,7 @@ az config set defaults.group=$rgName core.output=tsv --only-show-errors
 # assign managed identities, and add them to hostpool.
 #
 spName=$1-sp
-subscription_id=$(az account show --query id -o tsv)
+subscription_id=$(az account show --query id)
 
 sed -i "s/enter-subscription-id-here/$subscription_id/g" CustomRole.json
 sed -i "s/project-id/$1/g" CustomRole.json
@@ -39,6 +39,12 @@ spKey=$(az ad sp create-for-rbac \
 	--role "Custom $1 Project Contributor Role" \
 	--scopes $rgId --only-show-errors --query password)
 
+spId=$(az ad sp list --display-name $spName --query [].id)
+
+#
+# Grant the Service Principal access to the project's KeyVault
+#
+az keyvault set-policy --name $1-KV --object-id $spId --secret-permissions get list --output none
 
 #
 # Must run az login before running the script
@@ -86,7 +92,7 @@ pipelineId=$(az pipelines create \
 
 echo $'\e[1;33m'$2/$1/_build?definitionId=$pipelineId$'\e[0m'
 
-usrName=$(az account show --query user.name -o tsv)
+usrName=$(az account show --query user.name)
 
 az pipelines variable create --name GitHubUser --value $usrName --pipeline-id $pipelineId --output none
 
