@@ -15,6 +15,7 @@ foreach ($ver in $imgVersions){
         $latestImage = $ver
     }
 }
+
 $hostPool = $projectId + "-HP"
 
 $activeHosts = Get-AzWvdSessionHost -ResourceGroupName $rgName -HostPoolName $hostPool | where {$_.AllowNewSession -eq $true} 
