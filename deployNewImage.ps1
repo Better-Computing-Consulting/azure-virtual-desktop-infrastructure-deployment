@@ -1,6 +1,7 @@
 ﻿param (
     [string]$projectId = $(throw "-projectId is required.")
 )
+Update-AzConfig -DisplayBreakingChangeWarning $false
 $ErrorActionPreference = "Stop"
 $rgName = $projectId + "-RG"
 $location = "westus"
@@ -87,7 +88,6 @@ for($i = 1;$i -le $hostsToReplace;$i++)
     $VM = Set-AzVMBootDiagnostic -VM $VM -Disable
     $VM = Add-AzVMNetworkInterface -VM $VM -Id $NIC.Id -DeleteOption Delete
     $VM = Set-AzVMSourceImage -VM $VM -Id $latestImage.id
-
 
     "Deploying VM " + $newVMName
     New-AzVM -ResourceGroupName $rgName -Location $location -VM $VM -LicenseType Windows_Client -DisableBginfoExtension -Verbose
