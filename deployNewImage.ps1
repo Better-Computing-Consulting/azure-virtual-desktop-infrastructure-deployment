@@ -6,7 +6,6 @@ $ErrorActionPreference = "Stop"
 $rgName = $projectId + "-RG"
 $location = "westus"
 
-
 #
 # Determine what is the latest golden image version in the Gallery.
 #
