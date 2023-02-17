@@ -30,4 +30,4 @@ steps:
       git status
       git add .
       git commit -m "Processed script"
-      git push --set-upstream origin master
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --set-upstream origin master
