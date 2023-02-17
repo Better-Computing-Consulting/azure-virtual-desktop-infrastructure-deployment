@@ -7,7 +7,7 @@ pr: none
 trigger: none
 
 schedules:
-- cron: "0 1 * * 7"
+- cron: "0 1 * * 0"
   displayName: "Run deploy job Sundays, 1AM" 
   always: true
   branches:
