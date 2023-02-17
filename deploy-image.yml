@@ -16,9 +16,9 @@ schedules:
 pool:
   vmImage: windows-latest
 steps:
-- task: AzureCLI@2
+- task: AzurePowerShell@5
   inputs:
     azureSubscription: 'AzureServiceConnection'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    #inlineScript: 'az webapp webjob triggered run --name $(WebAppName) --resource-group $(ResGrpName) --webjob-name GraphExcelEmailerWebJob -o yamlc'
+    azurePowerShellVersion: LatestVersion
+    ScriptType: 'InlineScript'
+    Inline: ./deployNewImage.ps1 $(System.TeamProject)
