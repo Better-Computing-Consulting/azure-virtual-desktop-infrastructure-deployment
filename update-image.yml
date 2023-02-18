@@ -24,7 +24,7 @@ steps:
       mv $afile done_scripts/
       #
       # GitHub commands require granting "Bypass policies when pushing"
-      # and "Contribute" rights to the Project's Buid Service User account
+      # and "Contribute" rights to the Project's Build Service User account
       # under Project settings > Repositories > Security.
       #
       git config --global user.email "$(GitHubUser)"
