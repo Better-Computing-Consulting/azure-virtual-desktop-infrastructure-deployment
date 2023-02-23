@@ -10,8 +10,14 @@ set -ev
 SECONDS=0
 location="westus"
 rgName=$1-RG
+imageGalery=${1}_Galery
+imageDefinitionName=Windows11MultiUser-VDI-Apps
 
 az config set defaults.location=$location defaults.group=$rgName core.output=tsv --only-show-errors
+
+az snapshot list --query "[].{Name:name, TimeCreated:timeCreated}" -o table
+
+az sig image-version list -r $imageGalery -i $imageDefinitionName -o table
 
 #
 # Get the id of the most recent snapshot, i.e., the one with highest created time.
@@ -64,9 +70,6 @@ done
 az vm deallocate -n $vmName
 az vm generalize -n $vmName
 
-imageGalery=${1}_Galery
-imageDefinitionName=Windows11MultiUser-VDI-Apps
-
 #
 # Increment the patch numeber of the image version in the variable that we pass to the command that creates the new image version.
 # And lastly, delete the vm.
@@ -79,6 +82,10 @@ nextVersion=${parts[0]}.${parts[1]}.$((parts[2]+1))
 az sig image-version create  -r $imageGalery -i $imageDefinitionName -e $nextVersion --virtual-machine $vmId --output none
 
 az vm delete -n $vmName --force-deletion yes -y
+
+az snapshot list --query "[].{Name:name, TimeCreated:timeCreated}" -o table
+
+az sig image-version list -r $imageGalery -i $imageDefinitionName -o table
 
 az config unset defaults.location defaults.group core.output --only-show-errors
 

@@ -4,8 +4,22 @@
 Update-AzConfig -DisplayBreakingChangeWarning $false
 $ErrorActionPreference = "Stop"
 $rgName = $projectId + "-RG"
+$hostPool = $projectId + "-HP"
 $location = "westus"
 
+function Show-PoolHosts{
+    $currentHosts = Get-AzWvdSessionHost -ResourceGroupName $rgName -HostPoolName $hostPool
+    $format = "{0,-35}{1,-13}{2,-10}{3,-15}{4}"
+    $format -f "Name", "Status", "Sessions", "Image Version", "VM Power State"
+    foreach ($ahost in $currentHosts){ 
+        $vmPowerState = (Get-AzVM -ResourceId $ahost.ResourceId -Status).Statuses[1].Code
+        $imgVer = (Get-AzVM -ResourceId $ahost.ResourceId).StorageProfile.ImageReference.ExactVersion
+        $format -f $ahost.Name, $ahost.Status, $ahost.Session, $imgVer, $vmPowerState 
+    }
+}
+""
+Show-PoolHosts
+""
 #
 # Determine what is the latest golden image version in the Gallery.
 #
@@ -21,7 +35,6 @@ foreach ($ver in $imgVersions){
 #
 # Determine how many of the current hosts were deployed using and older image version.
 #
-$hostPool = $projectId + "-HP"
 $activeHosts = Get-AzWvdSessionHost -ResourceGroupName $rgName -HostPoolName $hostPool | where {$_.AllowNewSession -eq $true} 
 foreach ($ahost in $activeHosts){ 
         $vm = Get-AzVM -ResourceId $ahost.ResourceId
@@ -113,3 +126,6 @@ foreach ($shost in $activeHosts){
             }
         }
 }
+""
+Show-PoolHosts
+""

@@ -22,17 +22,32 @@ az config set defaults.group=$rgName core.output=tsv --only-show-errors
 # assign managed identities, and add them to hostpool.
 #
 spName=$1-sp
-subscription_id=$(az account show --query id)
-
-sed -i "s/enter-subscription-id-here/$subscription_id/g" CustomRole.json
-sed -i "s/project-id/$1/g" CustomRole.json
-
-az role definition create --role-definition @CustomRole.json --only-show-errors --query "{roleType: roleType, roleName:roleName}" -o jsonc
-
-sed -i "s/$subscription_id/enter-subscription-id-here/g" CustomRole.json
-sed -i "s/$1/project-id/g" CustomRole.json
 
 rgId=$(az group show --query id)
+
+az role definition create --role-definition '{
+  "assignableScopes": [ "'"$rgId"'" ],
+  "description": "Grants full access to manage all resources, including assigning identity.",
+  "name": "Custom '$1' Project Contributor Role",
+  "permissions": [
+    {
+      "actions": [
+        "*"
+      ],
+      "dataActions": [],
+      "notActions": [
+        "Microsoft.Authorization/*/Delete",
+        "Microsoft.Authorization/elevateAccess/Action",
+        "Microsoft.Blueprint/blueprintAssignments/write",
+        "Microsoft.Blueprint/blueprintAssignments/delete",
+        "Microsoft.Compute/galleries/share/action"
+      ],
+      "notDataActions": []
+    }
+  ],
+  "roleName": "Custom '$1' Project Contributor Role",
+  "type": "Microsoft.Authorization/roleDefinitions"
+}' --only-show-errors --query "{roleType: roleType, roleName:roleName}" -o jsonc
 
 spKey=$(az ad sp create-for-rbac \
 	--name $spName \
@@ -112,3 +127,11 @@ az config unset defaults.group=$rgName core.output --only-show-errors
 
 duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
+
+parts=(${2///// })
+orgonly=$(echo "${parts[3]}" | sed 's:/*$::')
+echo Manually grant $'\e[1;33m''Bypass policies when pushing'$'\e[0m' and $'\e[1;33m''Contribute'$'\e[0m' rights to the $'\e[1;33m'$1 Build Service \($orgonly\)$'\e[0m' user account
+echo under $'\e[1;33m'Project settings \> Repositories \> Security$'\e[0m':
+echo
+echo $'\e[1;33m'https://dev.azure.com/$orgonly/$1/_settings/repositories?_a=permissions$'\e[0m' 
+echo

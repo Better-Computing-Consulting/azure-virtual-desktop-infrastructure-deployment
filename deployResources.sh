@@ -27,6 +27,8 @@ storageAccName=$(echo ${projectId,,})sa
 
 saId=$(az storage account create -n $storageAccName --sku Standard_LRS --default-action Deny --bypass AzureServices --query id --only-show-errors)
 
+az resource list --query "[].{Name:name, Type:type}" -o table
+
 az storage account network-rule add -n $storageAccName --subnet $subnetId -o none
 
 az network private-endpoint create \
@@ -36,6 +38,8 @@ az network private-endpoint create \
     --resource-group $rgName \
     --subnet $subnetId \
     --group-id blob -o none
+	
+az resource list --query "[].{Name:name, Type:type}" -o table
 
 #
 # Create random password and store it, along with the vdi host username, store it on a KeyVault, 
@@ -66,6 +70,8 @@ vmId=$(az vm create -n $vmName \
 	--nic-delete-option Delete \
 	--os-disk-delete-option Delete --query id --only-show-errors)
 
+az resource list --query "[].{Name:name, Type:type}" -o table
+
 #	
 # Execute on vm the powershell script that will use the connection string from the storage account
 # to setup FXLogix and the tenant id to configure OneDrive to silently move windows known folders.
@@ -80,7 +86,7 @@ sed 's/\\n/\'$'\n''/g' <<< $(sed "s|$tenantId|xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx
 #
 # Reboot the computer prior to running the powershell script to sysprep the server. 
 # Take a snapshot of the disk to use in the next customization of the image, 
-# then dealocate and generalize the vm in prepartion to image capture.
+# then deallocate and generalize the vm in prepartion to image capture.
 #
 az vm restart --name $vmName
 
@@ -113,12 +119,16 @@ az sig create -r $imageGalery -o none
 
 az sig image-definition create -r $imageGalery -i $imageDefinitionName -f windows-11 -p MicrosoftWindowsDesktop -s win11-22h2-avd --os-type Windows --hyper-v-generation V2 -o none
 
+az resource list --query "[].{Name:name, Type:type}" -o table
+
 #
-# Create the first version of the vm, and then delete the vm.
+# Create the image first version by capturing the vm, and then delete the vm.
 #
 imgId=$(az sig image-version create  -r $imageGalery -i $imageDefinitionName -e 0.1.0 --virtual-machine $vmId --query id)
 
 az vm delete -n $vmName --force-deletion yes -y
+
+az resource list --query "[].{Name:name, Type:type}" -o table
 
 #
 # Make sure the tenant and the current console meet the requirement to deploy Virtual Desktop
@@ -138,7 +148,7 @@ az extension add --upgrade -n desktopvirtualization --only-show-errors
 # Deploy the host pool making sure the rdp settings include targetisaadjoined, as the hosts will be Azure AD joined. 
 # Then, deploy the application group and workspace.
 #
-rdpSettings='audiomode:i:0;videoplaybackmode:i:1;devicestoredirect:s:*;enablecredsspsupport:i:1;redirectwebauthn:i:1;targetisaadjoined:i:1'
+rdpSettings='audiomode:i:0;videoplaybackmode:i:1;devicestoredirect:s:*;enablecredsspsupport:i:1;redirectwebauthn:i:1;targetisaadjoined:i:1;redirectclipboard:i:1'
 
 hostPoolId=$(az desktopvirtualization hostpool create -n $projectId-HP \
 	--custom-rdp-property "$rdpSettings" \
@@ -158,9 +168,11 @@ agId=$(az desktopvirtualization applicationgroup create -n $projectId-AG -g $rgN
 	
 az desktopvirtualization workspace create -n $projectId-Workspace --application-group-references $agId -o none
 
+az resource list --query "[].{Name:name, Type:type}" -o table
+
 #
-# Deploy the first vdi host vm based on the first version of the golden image, and assign it a managed identity, as this required for 
-# joining the server to Azure AD. Then join the server.)
+# Deploy the first vdi host vm based on the first version of the golden image, assign it a managed identity, and 
+# join the server to Azure AD.)
 #
 vmName=sh$(sed 's/[^0-9]*//g' <<< $projectId)v010-1
 
@@ -188,8 +200,21 @@ cmdOutput=$(az vm run-command invoke --command-id RunPowerShellScript -n $vmName
 
 sed 's/\\n/\'$'\n''/g' <<< $cmdOutput
 
+az resource list --query "[].{Name:name, Type:type}" -o table
+
 az config unset defaults.location defaults.group core.output --only-show-errors
 
 duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-echo echo Run $'\e[1;33m'./addAssignment.sh $projectId '<testUserUPN>'$'\e[0m' to grant a test user access to the Application Group and VDI hosts.
+
+set +v
+echo To grant a test user access to the Application Group and VDI hosts run:
+echo
+echo $'\e[1;33m'./addAssignment.sh $projectId '<testUserUPN>'$'\e[0m'
+echo
+echo To deploy the DevOps project with pipelines to automate update and replacement of vdi hosts run:
+echo
+echo $'\e[1;33m'az login$'\e[0m'
+echo $'\e[1;33m'export AZURE_DEVOPS_EXT_GITHUB_PAT=enter-github-pat-here$'\e[0m'
+echo $'\e[1;33m'./deployDevOpsProject.sh $projectId '<URL of Azure DevOps organization>' '<URL of cloned GitHub repository>' $'\e[0m' 
+echo
