@@ -8,6 +8,7 @@ $hostPool = $projectId + "-HP"
 $location = "westus"
 
 function Show-PoolHosts{
+    ""
     $currentHosts = Get-AzWvdSessionHost -ResourceGroupName $rgName -HostPoolName $hostPool
     $format = "{0,-35}{1,-13}{2,-10}{3,-15}{4}"
     $format -f "Name", "Status", "Sessions", "Image Version", "VM Power State"
@@ -16,10 +17,11 @@ function Show-PoolHosts{
         $imgVer = (Get-AzVM -ResourceId $ahost.ResourceId).StorageProfile.ImageReference.ExactVersion
         $format -f $ahost.Name, $ahost.Status, $ahost.Session, $imgVer, $vmPowerState 
     }
+    ""
 }
-""
+
 Show-PoolHosts
-""
+
 #
 # Determine what is the latest golden image version in the Gallery.
 #
@@ -106,7 +108,8 @@ for($i = 1;$i -le $hostsToReplace;$i++)
         -Publisher "Microsoft.Azure.ActiveDirectory" -Type "AADLoginForWindows" -TypeHandlerVersion "0.4"
     
     "Adding VM " + $newVMName + " to Host Pool"
-    Invoke-AzVMRunCommand -ResourceGroupName $rgName -Name $newVMName -CommandId 'RunPowerShellScript' -ScriptPath 'setWVDClient.ps1' -Parameter @{registrationtoken = $registrationInfo.Token}
+    $cmdResult = Invoke-AzVMRunCommand -ResourceGroupName $rgName -Name $newVMName -CommandId 'RunPowerShellScript' -ScriptPath 'setWVDClient.ps1' -Parameter @{registrationtoken = $registrationInfo.Token}
+    $cmdResult.Value[0].Message
 }
 
 #
@@ -126,6 +129,6 @@ foreach ($shost in $activeHosts){
             }
         }
 }
-""
+
 Show-PoolHosts
-""
+
