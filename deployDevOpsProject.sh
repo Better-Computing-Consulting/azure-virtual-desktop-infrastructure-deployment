@@ -128,6 +128,7 @@ az config unset defaults.group=$rgName core.output --only-show-errors
 duration=$SECONDS
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 
+set +v
 parts=(${2///// })
 orgonly=$(echo "${parts[3]}" | sed 's:/*$::')
 echo Manually grant $'\e[1;33m''Bypass policies when pushing'$'\e[0m' and $'\e[1;33m''Contribute'$'\e[0m' rights to the $'\e[1;33m'$1 Build Service \($orgonly\)$'\e[0m' user account
