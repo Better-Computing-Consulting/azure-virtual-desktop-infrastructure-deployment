@@ -69,6 +69,8 @@ az keyvault set-policy --name $1-KV --object-id $spId --secret-permissions get l
 #
 export AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY=$spKey
 
+az extension add --upgrade -n azure-devops --only-show-errors
+
 az devops configure --defaults project=$1 organization=$2
 
 # Create Azure DevOps project
