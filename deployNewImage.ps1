@@ -1,7 +1,7 @@
-﻿param (
+param (
     [string]$projectId = $(throw "-projectId is required.")
 )
-Update-AzConfig -DisplayBreakingChangeWarning $false
+Update-AzConfig -DisplayBreakingChangeWarning $false | out-null
 $ErrorActionPreference = "Stop"
 $rgName = $projectId + "-RG"
 $hostPool = $projectId + "-HP"
@@ -59,8 +59,12 @@ if ( $hostsToReplace -eq 0 ){
 #
 # Get the information required to deploy new hosts, i.e, Pool registration key, VNet info, Username and Password
 #
-$registrationInfo = New-AzWvdRegistrationInfo -ResourceGroupName $rgName -HostPoolName $hostPool -ExpirationTime $((get-date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))
-$Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName
+$registrationInfo = New-AzWvdRegistrationInfo `
+                        -ResourceGroupName $rgName `
+                        -HostPoolName $hostPool `
+                        -ExpirationTime $((get-date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))
+
+$Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName -WarningAction:SilentlyContinue
 
 #
 # Grant KeyVault access to the current public IP and retrieve the VDI host username and password, and remove access when done.
@@ -104,11 +108,23 @@ for($i = 1;$i -le $hostsToReplace;$i++)
     New-AzVM -ResourceGroupName $rgName -Location $location -VM $VM -LicenseType Windows_Client -DisableBginfoExtension
 
     "Joining VM " + $newVMName + " to AAD"
-    Set-AzVMExtension -ResourceGroupName $rgName -VMName $newVMName -Name  "AADLoginForWindows" -Location $VM.Location `
-        -Publisher "Microsoft.Azure.ActiveDirectory" -Type "AADLoginForWindows" -TypeHandlerVersion "0.4"
+    Set-AzVMExtension `
+        -ResourceGroupName $rgName `
+        -VMName $newVMName `
+        -Name  "AADLoginForWindows" `
+        -Location $VM.Location `
+        -Publisher "Microsoft.Azure.ActiveDirectory" `
+        -Type "AADLoginForWindows" `
+        -TypeHandlerVersion "0.4"
     
     "Adding VM " + $newVMName + " to Host Pool"
-    $cmdResult = Invoke-AzVMRunCommand -ResourceGroupName $rgName -Name $newVMName -CommandId 'RunPowerShellScript' -ScriptPath 'setWVDClient.ps1' -Parameter @{registrationtoken = $registrationInfo.Token}
+    $cmdResult = Invoke-AzVMRunCommand `
+                    -ResourceGroupName $rgName `
+                    -Name $newVMName `
+                    -CommandId 'RunPowerShellScript' `
+                    -ScriptPath 'setWVDClient.ps1' `
+                    -Parameter @{registrationtoken = $registrationInfo.Token}
+
     $cmdResult.Value[0].Message
 }
 
@@ -122,7 +138,9 @@ foreach ($shost in $activeHosts){
             Update-AzWvdSessionHost -ResourceGroupName $rgName `
                             -HostPoolName $hostPool `
                             -Name $vm.Name `
-                            -AllowNewSession:$false
+                            -AllowNewSession:$false `
+                            | select Name, Session, Status, AllowNewSession | ft
+
             if ($shost.Session -eq 0){ 
                 "Stopping VM: " + $vm.Name
                 Stop-AzVM -Id $vm.Id -Force
@@ -131,4 +149,3 @@ foreach ($shost in $activeHosts){
 }
 
 Show-PoolHosts
-
