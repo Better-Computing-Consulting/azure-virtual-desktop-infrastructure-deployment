@@ -70,6 +70,7 @@ $Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName -Warnin
 # Grant KeyVault access to the current public IP and retrieve the VDI host username and password, and remove access when done.
 #
 $vault = $projectId + "-KV"
+"Vault name: " + $vault
 $pubIp = (Invoke-WebRequest -uri “https://api.ipify.org/”).Content
 
 Add-AzKeyVaultNetworkRule -VaultName $vault -IpAddressRange $pubIp
