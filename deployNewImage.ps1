@@ -72,7 +72,7 @@ $Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName -Warnin
 $vault = $projectId + "-KV"
 "Vault name: " + $vault
 $pubIp = (Invoke-WebRequest -uri “https://api.ipify.org/”).Content
-
+"Agent's IP: " + $pubIp
 Add-AzKeyVaultNetworkRule -VaultName $vault -IpAddressRange $pubIp
 $vdiHostAdminUsername = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminUsername -AsPlainText
 $textPassword = Get-AzKeyVaultSecret -VaultName $vault -Name vdiHostAdminPassword -AsPlainText
