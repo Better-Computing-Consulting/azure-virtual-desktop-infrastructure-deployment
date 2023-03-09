@@ -119,10 +119,6 @@ pipelineId=$(az pipelines create \
     	--yml-path deploy-image.yml \
 	--skip-first-run true \
 	--service-connection $gitHubSvcId --only-show-errors --query id)
-	
-vdiSubnetId=$(az network vnet subnet show -n VDIHostsSubnet --vnet-name VDIVNet --query id)
-
-az pipelines variable create --name vdiSubnetId --value $vdiSubnetId --pipeline-id $pipelineId --output none
 
 az devops configure --defaults project="" organization=""
 az config unset defaults.group=$rgName core.output --only-show-errors
