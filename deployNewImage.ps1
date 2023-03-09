@@ -64,7 +64,7 @@ $registrationInfo = New-AzWvdRegistrationInfo `
                         -HostPoolName $hostPool `
                         -ExpirationTime $((get-date).ToUniversalTime().AddDays(1).ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ'))
 
-$Vnet = Get-AzVirtualNetwork -Name  "VDIVnet" -ResourceGroupName $rgName -WarningAction:SilentlyContinue
+$Vnet = Get-AzVirtualNetwork -Name "VDIVnet" -ResourceGroupName $rgName
 
 #
 # Grant KeyVault access to the current public IP and retrieve the VDI host username and password, and remove access when done.
