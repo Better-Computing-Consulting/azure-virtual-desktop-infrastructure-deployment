@@ -107,8 +107,6 @@ pipelineId=$(az pipelines create \
 	--skip-first-run true \
 	--service-connection $gitHubSvcId --only-show-errors --query id)
 
-echo $'\e[1;33m'$2/$1/_build?definitionId=$pipelineId$'\e[0m'
-
 usrName=$(az account show --query user.name)
 
 az pipelines variable create --name GitHubUser --value $usrName --pipeline-id $pipelineId --output none
@@ -121,8 +119,10 @@ pipelineId=$(az pipelines create \
     	--yml-path deploy-image.yml \
 	--skip-first-run true \
 	--service-connection $gitHubSvcId --only-show-errors --query id)
+	
+vdiSubnetId=$(az network vnet subnet show -n VDIHostsSubnet --vnet-name VDIVNet --query id)
 
-echo $'\e[1;33m'$2/$1/_build?definitionId=$pipelineId$'\e[0m'
+az pipelines variable create --name vdiSubnetId --value $vdiSubnetId --pipeline-id $pipelineId --output none
 
 az devops configure --defaults project="" organization=""
 az config unset defaults.group=$rgName core.output --only-show-errors
