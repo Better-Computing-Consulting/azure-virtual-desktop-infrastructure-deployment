@@ -12,6 +12,8 @@ These are some of the features of the Virtual Desktop infrastructure:
 + There is a private endpoint connection between the storage account and the subnet of the hostpool server, so connections to the FSLogix containers travel through Microsoft’s backbone.
 + The storage account has a Network Rule to allow connections only from the subnet containing the hostpool servers.
       
+> :warning: To successfully run the scripts the user should have sufficient permissions to 1) deploy new resource groups and resources, 2) assign managed identities, create custom roles and service principals, and 3) create new DevOps projects.
+
 
 To deploy the Virtual Desktop infrastructure run the **deployResources.sh**. This script will:
 
