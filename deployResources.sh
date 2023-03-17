@@ -79,7 +79,10 @@ az resource list --query "[].{Name:name, Type:type}" -o table
 connStr=$(az storage account show-connection-string -n $storageAccName)
 tenantId=$(az account show --query tenantId)
 
-cmdResult=$(az vm run-command invoke --command-id RunPowerShellScript -n $vmName --scripts @setFSLogixOneDrive.ps1 --parameters "connectionString=$connStr" "tennantId=$tenantId" --query value[0].message)
+cmdResult=$(az vm run-command invoke --command-id RunPowerShellScript -n $vmName \
+	--scripts @setFSLogixOneDrive.ps1 \
+	--parameters "connectionString=$connStr" "tennantId=$tenantId" \
+	--query value[0].message)
 
 sed 's/\\n/\'$'\n''/g' <<< $(sed "s|$tenantId|xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx|g" <<< $cmdResult)
 
@@ -196,7 +199,10 @@ az vm extension set --publisher Microsoft.Azure.ActiveDirectory -n AADLoginForWi
 #
 hpToken=$(az desktopvirtualization hostpool retrieve-registration-token --ids $hostPoolId --query token)
 
-cmdOutput=$(az vm run-command invoke --command-id RunPowerShellScript -n $vmName --scripts @setWVDClient.ps1 --parameters "registrationtoken=$hpToken" --query value[0].message)
+cmdOutput=$(az vm run-command invoke --command-id RunPowerShellScript -n $vmName \
+	--scripts @setWVDClient.ps1 \
+	--parameters "registrationtoken=$hpToken" \
+	--query value[0].message)
 
 sed 's/\\n/\'$'\n''/g' <<< $cmdOutput
 
