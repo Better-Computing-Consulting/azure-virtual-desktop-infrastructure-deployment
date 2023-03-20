@@ -47,14 +47,27 @@ else{
 
 #Configure FXLogix
 if(Test-Path HKLM:\Software\FSLogix\Profiles){
-    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "Enabled" -ErrorAction:SilentlyContinue -PropertyType:DWord -Value 1 -Force
-    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "VolumeType" -ErrorAction:SilentlyContinue -PropertyType:String -Value vhdx -Force
-    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "CCDLocations" -ErrorAction:SilentlyContinue -PropertyType:String -Value "type=azure,connectionString=|fslogix/connectionString|" -Force 
-    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "DeleteLocalProfileWhenVHDShouldApply" -ErrorAction:SilentlyContinue -PropertyType:dword -Value 1 -Force
-    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "FlipFlopProfileDirectoryName" -ErrorAction:SilentlyContinue -PropertyType:dword -Value 1 -Force
+    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" `
+        -Name "Enabled" `
+        -PropertyType:DWord `
+        -Value 1 -Force
+    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" `
+        -Name "CCDLocations" `
+        -PropertyType:String `
+        -Value "type=azure,connectionString=|fslogix/connectionString|" -Force
+    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" `
+        -Name "VolumeType" `
+        -PropertyType:String -Value vhdx -Force
+    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" `
+        -Name "DeleteLocalProfileWhenVHDShouldApply" `
+        -PropertyType:dword `
+        -Value 1 -Force
+    New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" `
+        -Name "FlipFlopProfileDirectoryName" `
+        -PropertyType:dword `
+        -Value 1 -Force
 }
 
-#Enable silent configuration
 #Silently move Windows known folders to OneDrive
 
 $HKLMregistryPath = 'HKLM:\SOFTWARE\Policies\Microsoft\OneDrive'
@@ -64,13 +77,13 @@ if(!(Test-Path HKLM:\SOFTWARE\Microsoft\OneDrive)){
     Start-Process -FilePath ./OneDriveSetup.exe -ArgumentList "/allusers /silent" -Wait
     $oneDrivePath = 'C:\Program Files\Microsoft OneDrive\OneDrive.exe'
     if(Test-Path "C:\Program Files (x86)\Microsoft OneDrive\OneDrive.exe"){ $oneDrivePath = "C:\Program Files (x86)\Microsoft OneDrive\OneDrive.exe"}
-    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "OneDrive" -ErrorAction:SilentlyContinue -PropertyType:String -Value $oneDrivePath -Force
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "OneDrive" -PropertyType:String -Value $oneDrivePath -Force
 }
 
 if(!(Test-Path $HKLMregistryPath)){New-Item -Path $HKLMregistryPath -Force > $null}
-New-ItemProperty -Path $HKLMregistryPath -Name 'SilentAccountConfig' -ErrorAction:SilentlyContinue -PropertyType:DWord  -Value '1' -Force 
-New-ItemProperty -Path $HKLMregistryPath -Name "KFMSilentOptIn" -ErrorAction:SilentlyContinue -PropertyType:String -Value $tennantId -Force
-New-ItemProperty -Path $HKLMregistryPath -Name 'FilesOnDemandEnabled' -ErrorAction:SilentlyContinue -PropertyType:DWord -Value '1' -Force
+New-ItemProperty -Path $HKLMregistryPath -Name 'SilentAccountConfig' -PropertyType:DWord  -Value '1' -Force 
+New-ItemProperty -Path $HKLMregistryPath -Name "KFMSilentOptIn" -PropertyType:String -Value $tennantId -Force
+New-ItemProperty -Path $HKLMregistryPath -Name 'FilesOnDemandEnabled' -PropertyType:DWord -Value '1' -Force
 
 try {
     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
