@@ -81,6 +81,16 @@ The **deployDevOpsProject.sh** takes three arguments, the project’s id, the UR
 8.	Create a variable for the pipeline with the username of the account running the script, to set the email of the GitHub user for the git commands.
 9.	Create the deploy image pipeline based on the **deploy-image.yml** script.
 
+This article describes the ADD, FSLogix and golden image details on the implementation:
+
+https://bcc.bz/post/azure-virtual-desktop-infrastructure-deployment-aad-fslogix-golden-image-howto
+
+I also posted a video demonstrating the execution of the project. The video also shows testing access to the newly deployed infrastructure and the security of the storage account with the FSLogix profiles. It also demonstrates triggering the execution of the update image pipeline by saving a new PowerShell script in the new_scripts directory and performing a manual run of the pipeline that updates the VMs in the hostpool with VMs based on the most recent version of the golden image.
+
+https://youtu.be/y11bGqROWI0
+
 I hope you find this project useful. 
 
 Enjoy.
+
+:smiley:
